@@ -356,6 +356,6 @@ EKS-Jenkins-CICD/
 
 ---
 
-**Author:** Rahul Kumar  
+**Author:** Rahul Hari Kumar  
 **GitHub:** https://github.com/DevRahul16
 
