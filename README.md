@@ -16,7 +16,9 @@ The infrastructure includes **Amazon EKS**, **EC2 (Jenkins server)**, **Docker**
 
 > 📌 **Diagram file:** `docs/architecture.png`
 
-![CI/CD Architecture Diagram](docs/architecture.png)
+<img width="500" height="600" alt="Image" src="https://github.com/user-attachments/assets/9abb1856-4bdb-471b-ab6d-bcfcf31b16a0" />
+
+
 
 **Flow Explanation:**
 - Developer pushes code to GitHub
