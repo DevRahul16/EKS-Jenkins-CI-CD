@@ -14,8 +14,7 @@ The infrastructure includes **Amazon EKS**, **EC2 (Jenkins server)**, **Docker**
 
 ### 📐 CI/CD Architecture Diagram
 
-> 📌 **Diagram file:** `docs/architecture.png`
-
+![CI/CD Architecture Diagram](docs/architecture.png)
 
 **Flow Explanation:**
 - Developer pushes code to GitHub
@@ -56,7 +55,6 @@ kubectl        Kubernetes Service
                     |
                     v
                  End Users
-```
 ```
 
 **Explanation:**
@@ -128,16 +126,6 @@ kubectl        Kubernetes Service
 
 ## 3️⃣ Jenkins Installation
 
-> 💡 **Tip:** All command blocks below automatically show a **Copy** button on GitHub for easy execution.
-
-```bash
-sudo dnf install java-17-amazon-corretto -y
-sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
-sudo yum install jenkins -y
-sudo systemctl start jenkins
-sudo systemctl enable jenkins
-```
 ```bash
 sudo dnf install java-17-amazon-corretto -y
 sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
@@ -187,12 +175,6 @@ kubectl version --client
 ```bash
 aws configure
 ```
-- Access Key ID: **************
-- Secret Access Key: **************
-- Region: ap-south-1
-- Output format: default
-
-> 🔒 **Security Note:** Access keys are sensitive credentials and must never be exposed in GitHub, screenshots, or code. Always mask them using `****` or environment variables.
 
 ---
 
@@ -202,137 +184,29 @@ aws eks --region ap-south-1 update-kubeconfig --name cluster1
 kubectl get nodes
 ```
 
-### Jenkins Access to kubeconfig & AWS
-```bash
-sudo mkdir -p /var/lib/jenkins/.kube
-sudo cp -R /home/ec2-user/.kube/config /var/lib/jenkins/.kube/config
-sudo chown -R jenkins:jenkins /var/lib/jenkins/.kube
-
-sudo cp -R /home/ec2-user/.aws /var/lib/jenkins/.aws
-sudo chown -R jenkins:jenkins /var/lib/jenkins/.aws
-
-sudo usermod -aG docker jenkins
-sudo systemctl restart jenkins
-```
-
 ---
 
 ## 7️⃣ Kubernetes Deployment
 
-Repository:
-```
-https://github.com/DevRahul16/999-proj1.git
-```
-
 ```bash
-git clone https://github.com/DevRahul16/999-proj1.git
-cd 999-proj1/k8
 kubectl apply -f fe.yaml
 kubectl apply -f be.yaml
 kubectl apply -f db.yaml
 ```
 
-Check Services:
-```bash
-kubectl get svc
-```
-
-Access application using Load Balancer DNS (HTTP).
-
 ---
 
 ## 8️⃣ Jenkins Pipeline
-
-### Required Plugins
-- Docker Pipeline
-- Kubernetes CLI
-
-### DockerHub Credentials
-- ID: dockerhub
-- Username: devrahul16
-
-### Jenkinsfile
-```groovy
-pipeline {
-    agent any
-    environment {
-        DOCKERHUB_CREDENTIALS = 'dockerhub'
-        DOCKER_IMAGE = 'devrahul16/fe'
-        KUBERNETES_DEPLOYMENT = 'frontend'
-    }
-    stages {
-        stage('Clone Repository') {
-            steps {
-                git branch: 'master', url: 'https://github.com/devrahul16/fe1.git'
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    env.TAG = "${env.BUILD_NUMBER}"
-                    sh "docker build -t $DOCKER_IMAGE:$TAG ."
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            steps {
-                withDockerRegistry([credentialsId: 'dockerhub', url: 'https://index.docker.io/v1/']) {
-                    sh "docker push $DOCKER_IMAGE:$TAG"
-                }
-            }
-        }
-        stage('Rolling Update Kubernetes Deployment') {
-            steps {
-                sh "kubectl set image deployment/$KUBERNETES_DEPLOYMENT frontend=$DOCKER_IMAGE:$TAG"
-            }
-        }
-    }
-}
-```
+(Refer Jenkinsfile in jenkins/ folder)
 
 ---
 
 ## 9️⃣ GitHub Webhook Configuration
 
-- Payload URL:
+Payload URL:
 ```
 http://<JENKINS-IP>:8080/github-webhook/
 ```
-- Content Type: application/json
-- SSL Verification: Disabled
-- Trigger Event: Push
-
-Enable **GitHub hook trigger for GITScm polling** in Jenkins job.
-
----
-
-## ✅ Final Outcome
-- Code push to GitHub automatically triggers Jenkins
-- Docker image is built & pushed
-- Kubernetes deployment is updated with zero downtime
-
----
-
-## 📸 Screenshots to Add
-
-Place screenshots inside the `docs/` folder:
-- `iam-eks-role.png`
-- `eks-cluster.png`
-- `node-group.png`
-- `jenkins-dashboard.png`
-- `pipeline-success.png`
-- `kubectl-get-svc.png`
-- `architecture.png`
-
----
-
-## 🚀 Improvements (Optional)
-- Use IAM Role for Service Account (IRSA)
-- Replace root access keys with IAM user / role-based access
-- Use HTTPS with ACM + ALB Ingress Controller
-- Store secrets in AWS Secrets Manager or Kubernetes Secrets
-- Use Jenkinsfile from SCM instead of inline pipeline
-- Add monitoring using Prometheus & Grafana
 
 ---
 
@@ -357,4 +231,3 @@ EKS-Jenkins-CICD/
 
 **Author:** Rahul Hari Kumar  
 **GitHub:** https://github.com/DevRahul16
-
